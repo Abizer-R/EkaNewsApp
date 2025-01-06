@@ -5,25 +5,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.abizer_r.newsapp.ui.home.HomeScreen
-import com.abizer_r.newsapp.ui.navigation.BottomBar
-import com.abizer_r.newsapp.ui.navigation.BottomNavTab
-import com.abizer_r.newsapp.ui.saved.SavedScreen
+import androidx.navigation.compose.rememberNavController
+import com.abizer_r.newsapp.ui.navigation.BottomNavBar
+import com.abizer_r.newsapp.ui.navigation.BottomNavTabs
+import com.abizer_r.newsapp.ui.navigation.NewsNavHostContainer
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
 
 @Composable
 fun NewsApp() {
-    var selectedTab: BottomNavTab by remember { mutableStateOf(BottomNavTab.HOME) }
+    val navController = rememberNavController()
+    val tabs = listOf(BottomNavTabs.Home, BottomNavTabs.Saved)
     Scaffold(
         bottomBar = {
-            BottomBar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+            BottomNavBar(navController, tabs)
         }
     ) { paddingValues ->
         Box(
@@ -31,17 +28,14 @@ fun NewsApp() {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            when (selectedTab) {
-                BottomNavTab.HOME -> HomeScreen()
-                BottomNavTab.SAVED -> SavedScreen()
-            }
+            NewsNavHostContainer(navController, paddingValues)
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+private fun Preview() {
     NewsAppTheme {
         NewsApp()
     }
