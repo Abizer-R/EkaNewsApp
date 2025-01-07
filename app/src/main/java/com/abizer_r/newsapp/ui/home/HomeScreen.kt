@@ -104,7 +104,8 @@ fun NewsItemRow(
     ) {
         AsyncImage(
             model = item.thumbnailUrl,
-//            painter = painterResource(item.thumbnailResId),
+            placeholder = painterResource(id = R.drawable.ic_image_placeholder),
+            error = painterResource(id = R.drawable.ic_image_placeholder),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
