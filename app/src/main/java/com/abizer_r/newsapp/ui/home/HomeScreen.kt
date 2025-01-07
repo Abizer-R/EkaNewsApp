@@ -18,10 +18,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,35 +41,48 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.abizer_r.data.home.model.Article
+import com.abizer_r.data.util.RetrofitInstance
 import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
 @Composable
 fun HomeScreen() {
-    val newsItems = listOf(
-        NewsItem(
-            thumbnailResId = R.drawable.ic_image_placeholder,
-            heading = "Breaking News: Compose Updates",
-            description = "Jetpack Compose has released a new update that includes exciting new features and enhancements. Stay tuned for more details!"
-        ),
-        NewsItem(
-            thumbnailResId = R.drawable.ic_image_placeholder,
-            heading = "Tech Giants Collaborate",
-            description = "Top tech companies are joining forces to tackle pressing global challenges. This initiative marks a significant milestone in the industry."
-        ),
-        NewsItem(
-            thumbnailResId = R.drawable.ic_image_placeholder,
-            heading = "Space Exploration Advances",
-            description = "A new era of space exploration begins as private companies and governments invest heavily in lunar and Martian missions."
-        )
-    )
 
+    val newsList = remember { mutableStateListOf<NewsItem>() }
+
+    LaunchedEffect(Unit) {
+        val response = RetrofitInstance.api.getTopHeadlines()
+        val domainItems = response.articles?.map { it.toDomainNewsItem() }
+            ?: emptyList()
+        newsList.clear()
+        newsList.addAll(domainItems)
+    }
+
+    if (newsList.isEmpty()) {
+        Box(Modifier.fillMaxSize()) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center))
+        }
+    } else {
+        HomeScreenContent(
+            newsList = newsList,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+private fun HomeScreenContent(
+    newsList: List<NewsItem>,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(8.dp)
     ) {
-        items(newsItems) { item ->
+        items(newsList) { item ->
             NewsItemRow(item = item)
         }
     }
@@ -78,18 +97,19 @@ fun NewsItemRow(
         modifier = modifier
             .clip(RoundedCornerShape(5.dp))
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background.copy(0.8f))
+            .background(MaterialTheme.colorScheme.primary.copy(0.1f))
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(item.thumbnailResId),
+        AsyncImage(
+            model = item.thumbnailUrl,
+//            painter = painterResource(item.thumbnailResId),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .clip(RoundedCornerShape(5.dp))
-                .size(72.dp)
+                .weight(0.4f)
                 .aspectRatio(1f)
         )
         Column(
@@ -97,18 +117,21 @@ fun NewsItemRow(
         ) {
             Text(
                 text = item.heading,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    lineHeight = 20.sp
+                ),
+                maxLines = 2,
                 fontWeight = FontWeight.Bold
             )
+            Spacer(Modifier.size(2.dp))
             Text(
                 text = item.description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            ClickableText(
+            Text(
                 text = AnnotatedString("Read more..."),
-                onClick = {},
                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
             )
         }
@@ -116,15 +139,30 @@ fun NewsItemRow(
 }
 
 data class NewsItem(
-    val thumbnailResId: Int,
     val heading: String,
-    val description: String
+    val description: String,
+    val thumbnailUrl: String,
+    val newsUrl: String
 )
+
+fun Article.toDomainNewsItem(): NewsItem {
+    return NewsItem(
+        heading = this.title ?: "",
+        description = this.description ?: "",
+        thumbnailUrl = this.urlToImage ?: "",
+        newsUrl = this.url ?: ""
+    )
+}
 
 @Preview
 @Composable
 private fun Preview() {
+    val newsList = arrayListOf<NewsItem>()
+    repeat(10) { index ->
+        val item = NewsItem("Dummy Heading $index", "Dummy Desc $index", "", "")
+        newsList.add(item)
+    }
     NewsAppTheme {
-        HomeScreen()
+        HomeScreenContent(newsList)
     }
 }

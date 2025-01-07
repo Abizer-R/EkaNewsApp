@@ -23,13 +23,7 @@ fun NewsApp() {
             BottomNavBar(navController, tabs)
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            NewsNavHostContainer(navController, paddingValues)
-        }
+        NewsNavHostContainer(navController, paddingValues)
     }
 }
 
