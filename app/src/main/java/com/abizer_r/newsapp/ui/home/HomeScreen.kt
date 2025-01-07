@@ -1,6 +1,5 @@
 package com.abizer_r.newsapp.ui.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,48 +15,38 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.abizer_r.data.home.model.Article
-import com.abizer_r.data.util.RetrofitInstance
+import com.abizer_r.data.news.model.Article
 import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: NewsViewModel = hiltViewModel()
+) {
 
-    val newsList = remember { mutableStateListOf<NewsItem>() }
-
-    LaunchedEffect(Unit) {
-        val response = RetrofitInstance.api.getTopHeadlines()
-        val domainItems = response.articles?.map { it.toDomainNewsItem() }
-            ?: emptyList()
-        newsList.clear()
-        newsList.addAll(domainItems)
-    }
+    val newsList by viewModel.articles.collectAsStateWithLifecycle()
 
     if (newsList.isEmpty()) {
         Box(Modifier.fillMaxSize()) {

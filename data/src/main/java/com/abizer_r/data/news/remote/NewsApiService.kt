@@ -1,7 +1,7 @@
-package com.abizer_r.data.home.remote
+package com.abizer_r.data.news.remote
 
 import com.abizer_r.data.BuildConfig
-import com.abizer_r.data.home.model.NewsResponse
+import com.abizer_r.data.news.model.NewsResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

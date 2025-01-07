@@ -1,4 +1,4 @@
-package com.abizer_r.data.home.model
+package com.abizer_r.data.news.model
 
 data class NewsResponse(
     val articles: List<Article>? = null,
