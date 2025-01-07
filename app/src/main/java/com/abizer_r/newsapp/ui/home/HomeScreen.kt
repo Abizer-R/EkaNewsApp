@@ -28,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,17 +48,35 @@ fun HomeScreen(
     viewModel: NewsViewModel = hiltViewModel()
 ) {
 
-    val newsList by viewModel.articles.collectAsStateWithLifecycle()
+    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-    if (newsList.isEmpty()) {
-        Box(Modifier.fillMaxSize()) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
+    when (screenState) {
+        HomeScreenState.Loading -> {
+            Box(Modifier.fillMaxSize()) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
+            }
         }
-    } else {
-        HomeScreenContent(
-            newsList = newsList,
-            modifier = Modifier.fillMaxSize()
-        )
+        is HomeScreenState.Failure -> {
+            val errorMessage = (screenState as HomeScreenState.Failure).errorMessage
+                ?: stringResource(R.string.something_went_wrong)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = errorMessage,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+        is HomeScreenState.Success -> {
+            val newsList = (screenState as HomeScreenState.Success).articles
+            HomeScreenContent(
+                newsList = newsList,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -65,6 +85,16 @@ private fun HomeScreenContent(
     newsList: List<NewsItem>,
     modifier: Modifier = Modifier
 ) {
+    if (newsList.isEmpty()) {
+        Box(modifier.fillMaxSize()) {
+            Text(
+                text = stringResource(R.string.no_news_found),
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        return
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
