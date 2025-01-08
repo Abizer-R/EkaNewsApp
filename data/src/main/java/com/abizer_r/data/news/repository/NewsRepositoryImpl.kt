@@ -4,6 +4,7 @@ import com.abizer_r.data.news.local.NewsDao
 import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.model.NewsResponse
 import com.abizer_r.data.news.remote.NewsApiService
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class NewsRepositoryImpl @Inject constructor(
@@ -23,7 +24,7 @@ class NewsRepositoryImpl @Inject constructor(
         newsDao.insertNewsItems(newsItems)
     }
 
-    override suspend fun getSavedNews(source: String): List<NewsItemDb> {
+    override suspend fun getSavedNews(source: String): Flow<List<NewsItemDb>> {
         return newsDao.getAllNewsItems(source = source)
     }
 

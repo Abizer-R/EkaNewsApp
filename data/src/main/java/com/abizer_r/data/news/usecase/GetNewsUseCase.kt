@@ -8,6 +8,7 @@ import com.abizer_r.data.util.ResultData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -30,8 +31,9 @@ class GetNewsUseCase @Inject constructor(
 
     fun fetchSavedNews(): Flow<ResultData<List<NewsItemDb>>> = flow {
         emit(ResultData.Loading())
-        val articles = repository.getSavedNews(source = NEWS_SOURCE_USER_SAVED)
-        emit(ResultData.Success(articles))
+        repository.getSavedNews(source = NEWS_SOURCE_USER_SAVED).collect { list ->
+            emit(ResultData.Success(list))
+        }
     }.catch { e ->
         emit(ResultData.Failed(message = e.localizedMessage))
     }.flowOn(Dispatchers.IO)

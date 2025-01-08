@@ -54,6 +54,5 @@ class SavedNewsViewModel @Inject constructor(
 
     fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
         savedNewsUseCase.deleteNews(item.toDbEntity())
-        fetchSavedNews()
     }
 }
