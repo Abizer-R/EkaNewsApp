@@ -28,6 +28,7 @@ class WebViewActivity : ComponentActivity() {
     companion object {
         const val EXTRA_URL = "extra_url"
         const val EXTRA_NEWS_ID = "extra_news_id"
+        const val EXTRA_IS_SAVED = "extra_is_saved"
 
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +37,7 @@ class WebViewActivity : ComponentActivity() {
 
         val url = intent.getStringExtra(EXTRA_URL) ?: ""
         val newsId = intent.getStringExtra(EXTRA_NEWS_ID)
+        val isSaved = intent.getBooleanExtra(EXTRA_IS_SAVED, false)
 
         setContent {
             NewsAppTheme {
@@ -44,6 +46,7 @@ class WebViewActivity : ComponentActivity() {
                         .padding(WindowInsets.systemBars.asPaddingValues())
                         .fillMaxSize(),
                     url = url,
+                    isSaved = isSaved,
                     onBackPressed = { finish() },
                     onSaveClicked = {
                         val resultIntent = Intent().apply {

@@ -1,5 +1,8 @@
 package com.abizer_r.data.news.usecase
 
+import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
+import com.abizer_r.data.news.local.NewsItemDb
+import com.abizer_r.data.news.model.NewsItemApi
 import com.abizer_r.data.news.model.NewsResponse
 import com.abizer_r.data.news.repository.NewsRepository
 import com.abizer_r.data.util.ResultData
@@ -15,10 +18,20 @@ import javax.inject.Singleton
 class GetNewsUseCase @Inject constructor(
     private val repository: NewsRepository
 ) {
-    fun execute(): Flow<ResultData<NewsResponse?>> = flow {
+    fun fetchTopHeadlines(): Flow<ResultData<List<NewsItemApi>>> = flow {
         emit(ResultData.Loading())
         // TODO: add safe API call helper
         val articles = repository.getTopHeadlines()
+        val newsItems = articles?.newsItems ?: emptyList()
+        emit(ResultData.Success(newsItems))
+    }.catch { e ->
+        emit(ResultData.Failed(message = e.localizedMessage))
+    }.flowOn(Dispatchers.IO)
+
+
+    fun fetchSavedNews(): Flow<ResultData<List<NewsItemDb>>> = flow {
+        emit(ResultData.Loading())
+        val articles = repository.getSavedNews(source = NEWS_SOURCE_USER_SAVED)
         emit(ResultData.Success(articles))
     }.catch { e ->
         emit(ResultData.Failed(message = e.localizedMessage))

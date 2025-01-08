@@ -1,12 +1,15 @@
 package com.abizer_r.data.news.model
 
+import java.util.UUID
+
 data class NewsResponse(
-    val articles: List<Article>? = null,
+    val newsItems: List<NewsItemApi>? = null,
     val status: String? = null,
     val totalResults: Int? = null
 )
 
-data class Article(
+data class NewsItemApi(
+    val id: String = UUID.randomUUID().toString(),
     val description: String? = null,
     val title: String? = null,
     val url: String? = null,

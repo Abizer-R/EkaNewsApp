@@ -19,9 +19,10 @@ import com.abizer_r.newsapp.R
 
 @Composable
 fun RetryView(
-    errorText: String = stringResource(R.string.something_went_wrong),
+    errorText: String? = null,
     onRetryClicked: () -> Unit
 ) {
+    val mErrorText = errorText ?: stringResource(R.string.something_went_wrong)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,7 +31,7 @@ fun RetryView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = errorText,
+            text = mErrorText,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )

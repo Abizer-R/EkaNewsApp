@@ -1,6 +1,5 @@
 package com.abizer_r.data.news.repository
 
-import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.local.NewsDao
 import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.model.NewsResponse
@@ -16,8 +15,12 @@ class NewsRepositoryImpl @Inject constructor(
         return newsApiService.getTopHeadlines()
     }
 
-    override suspend fun saveNews(newsItem: NewsItemDb) {
-        newsDao.insertNewsItems(listOf(newsItem))
+    override suspend fun saveNewsToDb(newsItem: NewsItemDb) {
+        saveNewsItemsToDb(listOf(newsItem))
+    }
+
+    override suspend fun saveNewsItemsToDb(newsItems: List<NewsItemDb>) {
+        newsDao.insertNewsItems(newsItems)
     }
 
     override suspend fun getSavedNews(source: String): List<NewsItemDb> {

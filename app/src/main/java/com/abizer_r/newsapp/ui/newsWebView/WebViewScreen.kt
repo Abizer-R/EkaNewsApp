@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,8 +39,9 @@ import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 @Composable
 fun WebViewScreen(
     url: String,
-    onBackPressed: () -> Unit,
-    onSaveClicked: () -> Unit,
+    isSaved: Boolean = false,
+    onBackPressed: () -> Unit = {},
+    onSaveClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box {
@@ -73,7 +76,10 @@ fun WebViewScreen(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-            Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Save")
+            val icon = if (isSaved) {
+                Icons.Default.Bookmark
+            } else Icons.Outlined.BookmarkBorder
+            Icon(icon, contentDescription = "Save")
         }
     }
 }
