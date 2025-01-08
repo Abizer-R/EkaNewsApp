@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class NewsRepositoryImpl @Inject constructor(
     private val newsApiService: NewsApiService,
-    private val newsDao: NewsDao
+    private val newsDao: NewsDao,
 ) : NewsRepository {
 
     override suspend fun getTopHeadlines(): NewsResponse? {

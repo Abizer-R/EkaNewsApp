@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.newsapp.ui.NewsApp
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
+import com.abizer_r.newsapp.util.NetworkConnectionObserver
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

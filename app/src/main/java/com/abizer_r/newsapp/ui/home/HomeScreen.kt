@@ -4,15 +4,22 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.common.error.RetryView
 import com.abizer_r.newsapp.ui.common.loading.LoadingView
 import com.abizer_r.newsapp.ui.home.model.NewsItem
@@ -30,6 +37,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val navigateToSavedScreen by viewModel.navigateToSavedScreenState.collectAsStateWithLifecycle()
+    val isNetworkAvailable by viewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
     LaunchedEffect(navigateToSavedScreen) {
         if (navigateToSavedScreen) {
@@ -57,19 +65,31 @@ fun HomeScreen(
         )
 
         is HomeScreenState.Success -> {
-            NewsListVertical(
-                newsList = screenState.getNewsList(),
-                onItemClick = { item ->
-                    launcher.launch(
-                        Intent(context, WebViewActivity::class.java).apply {
-                            putExtra(EXTRA_URL, item.newsUrl)
-                            putExtra(EXTRA_NEWS_ID, item.id)
-                        }
+            Column {
+                NewsListVertical(
+                    newsList = screenState.getNewsList(),
+                    onItemClick = { item ->
+                        launcher.launch(
+                            Intent(context, WebViewActivity::class.java).apply {
+                                putExtra(EXTRA_URL, item.newsUrl)
+                                putExtra(EXTRA_NEWS_ID, item.id)
+                            }
+                        )
+                    },
+                    onReload = { viewModel.fetchTopHeadlines() },
+                    modifier = Modifier.weight(1f)
+                )
+
+                AnimatedVisibility(
+                    visible = !isNetworkAvailable
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.no_connection),
+                        textAlign = TextAlign.Center
                     )
-                },
-                onReload = { viewModel.fetchTopHeadlines() },
-                modifier = Modifier.fillMaxSize()
-            )
+                }
+            }
         }
     }
 }

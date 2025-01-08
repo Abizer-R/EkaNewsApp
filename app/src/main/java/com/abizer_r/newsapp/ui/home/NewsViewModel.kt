@@ -1,6 +1,7 @@
 package com.abizer_r.newsapp.ui.home
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.usecase.GetNewsUseCase
@@ -9,6 +10,7 @@ import com.abizer_r.data.util.ResultData
 import com.abizer_r.newsapp.ui.home.model.NewsItem
 import com.abizer_r.newsapp.ui.home.model.toDbEntity
 import com.abizer_r.newsapp.ui.home.model.toUiModel
+import com.abizer_r.newsapp.util.NetworkConnectionObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +32,7 @@ sealed class HomeScreenState {
 class NewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
     private val saveNewsUseCase: SavedNewsUseCase,
+    private val networkConnectionObserver: NetworkConnectionObserver
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
@@ -37,6 +40,8 @@ class NewsViewModel @Inject constructor(
 
     private val _navigateToSavedScreen = MutableStateFlow<Boolean>(false)
     val navigateToSavedScreenState: StateFlow<Boolean> = _navigateToSavedScreen
+
+    val isNetworkAvailable: StateFlow<Boolean> get() = networkConnectionObserver.isNetworkAvailable
 
     init {
         fetchTopHeadlines()
