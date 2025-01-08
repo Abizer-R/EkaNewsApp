@@ -2,6 +2,7 @@ package com.abizer_r.newsapp.ui.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.usecase.GetNewsUseCase
 import com.abizer_r.data.news.usecase.SavedNewsUseCase
 import com.abizer_r.data.util.ResultData
@@ -53,6 +54,17 @@ class SavedNewsViewModel @Inject constructor(
     }
 
     fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
-        savedNewsUseCase.deleteNews(item.toDbEntity())
+        savedNewsUseCase.deleteNewsByUrl(item.newsUrl)
+    }
+
+    fun saveNews(
+        newsId: String?,
+        source: String = NEWS_SOURCE_USER_SAVED
+    ) = viewModelScope.launch {
+        val newsItem = screenState.value.getNewsList().find { it.id == newsId }
+        if (newsItem == null)
+            return@launch
+        val dbItem = newsItem.toDbEntity().copy(source = source)
+        savedNewsUseCase.saveToDb(dbItem)
     }
 }

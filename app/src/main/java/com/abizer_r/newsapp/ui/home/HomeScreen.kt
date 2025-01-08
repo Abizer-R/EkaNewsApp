@@ -18,6 +18,7 @@ import com.abizer_r.newsapp.ui.common.loading.LoadingView
 import com.abizer_r.newsapp.ui.home.model.NewsItem
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_NEWS_ID
+import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_SHOULD_SAVE_NEWS_ID
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_URL
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
@@ -40,8 +41,8 @@ fun HomeScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val savedNewsId = result.data?.getStringExtra(EXTRA_NEWS_ID)
-            viewModel.saveNews(savedNewsId)
+            val shouldSavedNewsId = result.data?.getStringExtra(EXTRA_SHOULD_SAVE_NEWS_ID)
+            viewModel.saveNews(shouldSavedNewsId)
         }
     }
 

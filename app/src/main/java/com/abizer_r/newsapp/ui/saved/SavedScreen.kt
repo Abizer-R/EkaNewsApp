@@ -15,8 +15,8 @@ import com.abizer_r.newsapp.ui.common.error.RetryView
 import com.abizer_r.newsapp.ui.common.loading.LoadingView
 import com.abizer_r.newsapp.ui.home.NewsListVertical
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity
-import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_IS_SAVED
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_NEWS_ID
+import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_SHOULD_SAVE_NEWS_ID
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_URL
 
 @Composable
@@ -31,9 +31,8 @@ fun SavedScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val savedNewsId = result.data?.getStringExtra(EXTRA_NEWS_ID)
-            // TODO: delete the saved item from the database
-            // TODO: allow WebViewScreen itself to check if item "url" is in database or not
+            val shouldSaveNewsId = result.data?.getStringExtra(EXTRA_SHOULD_SAVE_NEWS_ID)
+            viewModel.saveNews(shouldSaveNewsId)
         }
     }
 
@@ -56,7 +55,6 @@ fun SavedScreen(
                         Intent(context, WebViewActivity::class.java).apply {
                             putExtra(EXTRA_URL, item.newsUrl)
                             putExtra(EXTRA_NEWS_ID, item.id)
-                            putExtra(EXTRA_IS_SAVED, true)
                         }
                     )
                 },

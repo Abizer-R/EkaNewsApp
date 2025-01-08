@@ -11,7 +11,11 @@ class SavedNewsUseCase @Inject constructor(
         repository.saveNewsToDb(newsItem)
     }
 
-    suspend fun deleteNews(item: NewsItemDb) {
-        repository.deleteNewsByUrl(item.newsUrl)
+    suspend fun deleteNewsByUrl(url: String) {
+        repository.deleteNewsByUrl(url)
+    }
+
+    suspend fun checkNewsSavedByUrl(newsUrl: String): Boolean {
+        return repository.checkNewsSavedByUrl(newsUrl)
     }
 }

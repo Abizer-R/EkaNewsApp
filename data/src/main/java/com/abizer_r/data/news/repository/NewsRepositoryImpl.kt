@@ -16,6 +16,10 @@ class NewsRepositoryImpl @Inject constructor(
         return newsApiService.getTopHeadlines()
     }
 
+    override suspend fun checkNewsSavedByUrl(newsUrl: String): Boolean {
+        return newsDao.getNewsByUrl(newsUrl) != null
+    }
+
     override suspend fun saveNewsToDb(newsItem: NewsItemDb) {
         saveNewsItemsToDb(listOf(newsItem))
     }

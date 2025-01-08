@@ -12,6 +12,9 @@ interface NewsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNewsItems(newsItems: List<NewsItemDb>)
 
+    @Query("SELECT * FROM news_items WHERE newsUrl = :newsUrl LIMIT 1")
+    suspend fun getNewsByUrl(newsUrl: String): NewsItemDb?
+
     @Query("SELECT * from $News_TABLE_NAME WHERE source = :source")
     fun getAllNewsItems(source: String): Flow<List<NewsItemDb>>
 

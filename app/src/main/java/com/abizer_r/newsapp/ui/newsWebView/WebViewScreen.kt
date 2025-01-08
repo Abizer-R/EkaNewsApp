@@ -5,33 +5,43 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.common.error.RetryView
 import com.abizer_r.newsapp.ui.common.loading.LoadingView
@@ -40,11 +50,33 @@ import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 @Composable
 fun WebViewScreen(
     url: String,
-    isSaved: Boolean = false,
+    viewModel: WebViewScreenViewModel = hiltViewModel(),
     onBackPressed: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
+    val newsUnSaved by viewModel.newsUnsaved.collectAsStateWithLifecycle()
+    var showDialog by remember { mutableStateOf(false) }
+
+    val handleFabClicked: () -> Unit = remember { {
+        if (showDialog.not()) {
+            showDialog = true
+        }
+    } }
+
+    LaunchedEffect(Unit) {
+        viewModel.checkIfSaved(url)
+    }
+
+    LaunchedEffect(newsUnSaved) {
+        if (newsUnSaved) {
+            Toast.makeText(context, context.getString(R.string.unsave_successful), Toast.LENGTH_SHORT).show()
+            viewModel.resetUnsavedState()
+        }
+    }
+
     Box {
         Column(modifier = modifier.fillMaxSize()) {
             Row(
@@ -70,11 +102,10 @@ fun WebViewScreen(
             )
         }
         FloatingActionButton(
-            onClick = {
-                onSaveClicked()
-            },
+            onClick = handleFabClicked,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .padding(WindowInsets.navigationBars.asPaddingValues())
                 .padding(16.dp)
         ) {
             val icon = if (isSaved) {
@@ -83,10 +114,54 @@ fun WebViewScreen(
             Icon(
                 imageVector = icon,
                 contentDescription = "Save",
-                modifier = Modifier.clickable { onSaveClicked() }
+                modifier = Modifier.clickable { handleFabClicked() }
             )
         }
     }
+
+    if (showDialog) {
+        ConfirmationDialog(
+            isSaved = isSaved,
+            onConfirm = {
+                if (isSaved) {
+                    viewModel.deleteNews(url)
+                } else {
+                    onSaveClicked()
+                }
+                showDialog = false
+            },
+            onDismiss = { showDialog = false }
+        )
+    }
+}
+
+
+@Composable
+private fun ConfirmationDialog(
+    isSaved: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val title = stringResource(if (isSaved) R.string.unsave else R.string.save)
+    val text = stringResource(if (isSaved) R.string.unsave_dialog_text else R.string.save_dialog_text )
+    val positiveBtnText = title
+    val negativeBtnText = stringResource(R.string.cancel)
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(title) },
+        text = { Text(text) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(positiveBtnText)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(negativeBtnText)
+            }
+        }
+    )
 }
 
 @Composable
