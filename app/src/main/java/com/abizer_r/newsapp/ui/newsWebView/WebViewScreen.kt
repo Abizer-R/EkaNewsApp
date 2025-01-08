@@ -73,7 +73,7 @@ fun WebViewScreen(
     LaunchedEffect(newsUnSaved) {
         if (newsUnSaved) {
             Toast.makeText(context, context.getString(R.string.unsave_successful), Toast.LENGTH_SHORT).show()
-            viewModel.resetUnsavedState()
+            onBackPressed()
         }
     }
 
