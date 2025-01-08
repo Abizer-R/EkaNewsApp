@@ -11,5 +11,5 @@ interface NewsApiService {
         @Query("country") country: String = "us",
         @Query("category") category: String = "business",
         @Query("apiKey") apiKey: String = BuildConfig.NEWS_API_KEY
-    ): NewsResponse
+    ): NewsResponse?
 }

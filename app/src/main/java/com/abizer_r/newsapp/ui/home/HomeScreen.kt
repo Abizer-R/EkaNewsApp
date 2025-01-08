@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.model.Article
 import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.common.error.RetryView
@@ -63,10 +64,7 @@ fun HomeScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val savedNewsId = result.data?.getStringExtra(EXTRA_NEWS_ID)
-            savedNewsId?.let {
-                // TODO: save item in ROOM database
-                Log.d("HomeScreen", "HomeScreen: News item saved with ID: $savedNewsId")
-            }
+            viewModel.saveNews(savedNewsId)
         }
     }
 
@@ -200,6 +198,26 @@ fun Article.toDomainNewsItem(): NewsItem {
         description = this.description ?: "",
         thumbnailUrl = this.urlToImage ?: "",
         newsUrl = this.url ?: ""
+    )
+}
+
+fun NewsItem.toNewsItemDb(): NewsItemDb {
+    return NewsItemDb(
+        id = this.localId,
+        heading = this.heading,
+        description = description,
+        thumbnailUrl = thumbnailUrl,
+        newsUrl = newsUrl
+    )
+}
+
+fun NewsItemDb.toNewsItem(): NewsItem {
+    return NewsItem(
+        localId = id,
+        heading = this.heading,
+        description = description,
+        thumbnailUrl = thumbnailUrl,
+        newsUrl = newsUrl
     )
 }
 

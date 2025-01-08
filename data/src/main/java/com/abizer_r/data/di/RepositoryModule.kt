@@ -1,4 +1,4 @@
-package com.abizer_r.newsapp.di
+package com.abizer_r.data.di
 
 import com.abizer_r.data.news.repository.NewsRepository
 import com.abizer_r.data.news.repository.NewsRepositoryImpl

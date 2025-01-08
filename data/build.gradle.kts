@@ -3,6 +3,9 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.dagger.hilt.android)
+    id("androidx.room")
 }
 
 android {
@@ -46,6 +49,13 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
+}
+
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
 }
 
 dependencies {
@@ -61,5 +71,17 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
 
-    implementation("javax.inject:javax.inject:1")
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
+
+    // hilt
+    implementation(libs.google.hilt.android)
+    kapt(libs.google.hilt.compiler)
+    implementation(libs.androidx.hilt.compiler)
+}
+
+kapt {
+    correctErrorTypes = true
 }
