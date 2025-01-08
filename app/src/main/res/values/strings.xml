@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">NewsApp</string>
+    <string name="home">Home</string>
+    <string name="saved">Saved</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="no_news_found">No news found</string>
+    <string name="news_details">News Details</string>
+    <string name="save">Save</string>
+    <string name="failed_to_load_page">Failed to load page</string>
+    <string name="retry">Retry</string>
 </resources>
