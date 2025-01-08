@@ -11,4 +11,6 @@ interface NewsRepository {
     suspend fun saveNewsItemsToDb(newsItems: List<NewsItemDb>)
 
     suspend fun getSavedNews(source: String): List<NewsItemDb>
+
+    suspend fun deleteNewsByUrl(url: String)
 }

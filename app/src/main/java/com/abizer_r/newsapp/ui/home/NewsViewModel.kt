@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.usecase.GetNewsUseCase
-import com.abizer_r.data.news.usecase.SaveNewsUseCase
+import com.abizer_r.data.news.usecase.SavedNewsUseCase
 import com.abizer_r.data.util.ResultData
 import com.abizer_r.newsapp.ui.home.model.NewsItem
 import com.abizer_r.newsapp.ui.home.model.toDbEntity
@@ -29,7 +29,7 @@ sealed class HomeScreenState {
 @HiltViewModel
 class NewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
-    private val saveNewsUseCase: SaveNewsUseCase,
+    private val saveNewsUseCase: SavedNewsUseCase,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)

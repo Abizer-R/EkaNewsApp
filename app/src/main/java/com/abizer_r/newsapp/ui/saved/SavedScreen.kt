@@ -50,6 +50,7 @@ fun SavedScreen(
         is SavedNewsScreenState.Success -> {
             NewsListVertical(
                 newsList = screenState.getNewsList(),
+                showDelete = true,
                 onItemClick = { item ->
                     launcher.launch(
                         Intent(context, WebViewActivity::class.java).apply {
@@ -58,6 +59,9 @@ fun SavedScreen(
                             putExtra(EXTRA_IS_SAVED, true)
                         }
                     )
+                },
+                onDeleteClick = { item ->
+                    viewModel.deleteSavedNews(item)
                 },
                 onReload = { viewModel.fetchSavedNews() },
                 modifier = Modifier.fillMaxSize()

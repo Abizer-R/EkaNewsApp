@@ -3,8 +3,10 @@ package com.abizer_r.newsapp.ui.saved
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.data.news.usecase.GetNewsUseCase
+import com.abizer_r.data.news.usecase.SavedNewsUseCase
 import com.abizer_r.data.util.ResultData
 import com.abizer_r.newsapp.ui.home.model.NewsItem
+import com.abizer_r.newsapp.ui.home.model.toDbEntity
 import com.abizer_r.newsapp.ui.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,7 @@ sealed class SavedNewsScreenState {
 @HiltViewModel
 class SavedNewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
+    private val savedNewsUseCase: SavedNewsUseCase
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<SavedNewsScreenState>(SavedNewsScreenState.Loading)
@@ -47,5 +50,10 @@ class SavedNewsViewModel @Inject constructor(
             }
             _screenState.update { newState }
         }.collect()
+    }
+
+    fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
+        savedNewsUseCase.deleteNews(item.toDbEntity())
+        fetchSavedNews()
     }
 }

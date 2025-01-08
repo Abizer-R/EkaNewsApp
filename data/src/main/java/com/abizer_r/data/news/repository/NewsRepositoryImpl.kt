@@ -27,4 +27,7 @@ class NewsRepositoryImpl @Inject constructor(
         return newsDao.getAllNewsItems(source = source)
     }
 
+    override suspend fun deleteNewsByUrl(url: String) {
+        newsDao.deleteNewsByUrl(url)
+    }
 }

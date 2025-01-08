@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +35,9 @@ import com.abizer_r.newsapp.ui.home.model.NewsItem
 @Composable
 fun NewsItemRow(
     item: NewsItem,
+    showDelete: Boolean = false,
     onItemClick: (NewsItem) -> Unit = {},
+    onDeleteClick: (NewsItem) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -77,6 +83,17 @@ fun NewsItemRow(
                 text = AnnotatedString("Read more..."),
                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
             )
+        }
+
+        if (showDelete) {
+            IconButton(
+                onClick = { onDeleteClick(item) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete News Item"
+                )
+            }
         }
     }
 }
