@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.abizer_r.newsapp.R
 import com.abizer_r.newsapp.ui.NewsApp
 import com.abizer_r.newsapp.ui.home.HomeScreen
@@ -37,22 +38,26 @@ fun BottomNavBar(
     navController: NavController,
     bottomTabItems: List<BottomNavTabs>,
 ) {
-    var selectedTab by remember { mutableStateOf(bottomTabItems[0]) }
+    val currentDestination by navController.currentBackStackEntryAsState()
+    val currentRoute = currentDestination?.destination?.route
     NavigationBar {
         bottomTabItems.forEach { navTab ->
-            val isSelected = selectedTab == navTab
+            val isSelected = currentRoute == navTab.route
             val tabLabel = stringResource(navTab.titleResId)
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    selectedTab = navTab
-                    navController.navigate(navTab.route) { launchSingleTop = true}
+                    navController.navigate(navTab.route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        restoreState = true
+                        launchSingleTop = true
+                    }
                 },
                 label = { Text(text = tabLabel) },
                 icon = {
                     Icon(
-                        imageVector = if (selectedTab == navTab) {
+                        imageVector = if (isSelected) {
                             navTab.selectedIcon
                         } else navTab.unSelectedIcon,
                         contentDescription = tabLabel
