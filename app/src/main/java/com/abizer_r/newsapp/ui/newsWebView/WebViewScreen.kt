@@ -1,6 +1,8 @@
 package com.abizer_r.newsapp.ui.newsWebView
 
 import android.graphics.Bitmap
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.abizer_r.newsapp.R
+import com.abizer_r.newsapp.ui.common.error.RetryView
+import com.abizer_r.newsapp.ui.common.loading.LoadingView
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
 @Composable
@@ -57,7 +60,9 @@ fun WebViewScreen(
             }
             WebViewCompose(
                 url = url,
-                modifier = Modifier.weight(1f).fillMaxSize()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
             )
         }
         FloatingActionButton(
@@ -79,28 +84,55 @@ private fun WebViewCompose(
     modifier: Modifier = Modifier
 ) {
     var isLoading by remember { mutableStateOf(true) }
-    Box(modifier) {
-        AndroidView(
-            factory = { context ->
-                WebView(context).apply {
-                    settings.javaScriptEnabled = true
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                            super.onPageStarted(view, url, favicon)
-                            isLoading = true
-                        }
+    var hasError by remember { mutableStateOf(false) }
 
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            isLoading = false
-                        }
-                    }
-                    loadUrl(url)
+    Box(modifier) {
+        if (hasError) {
+            RetryView(
+                errorText = stringResource(R.string.failed_to_load_page),
+                onRetryClicked = {
+                    hasError = false
+                    isLoading = true
                 }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+            )
+        } else {
+            AndroidView(
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageStarted(
+                                view: WebView?,
+                                url: String?,
+                                favicon: Bitmap?
+                            ) {
+                                super.onPageStarted(view, url, favicon)
+                                isLoading = true
+                            }
+
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                isLoading = false
+                            }
+
+                            override fun onReceivedError(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                                error: WebResourceError?
+                            ) {
+                                super.onReceivedError(view, request, error)
+                                isLoading = false
+                                hasError = true
+                            }
+                        }
+                        loadUrl(url)
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+
+        }
         if (isLoading) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
+            LoadingView()
         }
     }
 }

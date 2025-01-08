@@ -32,7 +32,7 @@ class NewsViewModel @Inject constructor(
         fetchTopHeadlines()
     }
 
-    private fun fetchTopHeadlines() = viewModelScope.launch {
+    fun fetchTopHeadlines() = viewModelScope.launch {
         getNewsUseCase.execute().onEach { result ->
             val newState = when (result) {
                 is ResultData.Loading -> HomeScreenState.Loading

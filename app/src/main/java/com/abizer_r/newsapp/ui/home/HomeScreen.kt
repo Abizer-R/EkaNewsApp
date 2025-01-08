@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,17 +34,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.abizer_r.data.news.model.Article
 import com.abizer_r.newsapp.R
+import com.abizer_r.newsapp.ui.common.error.RetryView
+import com.abizer_r.newsapp.ui.common.loading.LoadingView
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_NEWS_ID
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_URL
@@ -74,23 +73,17 @@ fun HomeScreen(
 
     when (screenState) {
         HomeScreenState.Loading -> {
-            Box(Modifier.fillMaxSize()) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            }
+            LoadingView()
         }
         is HomeScreenState.Failure -> {
             val errorMessage = (screenState as HomeScreenState.Failure).errorMessage
                 ?: stringResource(R.string.something_went_wrong)
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = errorMessage,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            RetryView(
+                errorText = errorMessage,
+                onRetryClicked = {
+                    viewModel.fetchTopHeadlines()
+                }
+            )
         }
         is HomeScreenState.Success -> {
             val newsList = (screenState as HomeScreenState.Success).articles
