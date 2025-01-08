@@ -35,6 +35,9 @@ class NewsViewModel @Inject constructor(
     private val _screenState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
     val screenState: StateFlow<HomeScreenState> = _screenState
 
+    private val _navigateToSavedScreen = MutableStateFlow<Boolean>(false)
+    val navigateToSavedScreenState: StateFlow<Boolean> = _navigateToSavedScreen
+
     init {
         fetchTopHeadlines()
     }
@@ -62,6 +65,7 @@ class NewsViewModel @Inject constructor(
             return@launch
         val dbItem = newsItem.toDbEntity().copy(source = source)
         saveNewsUseCase.saveToDb(dbItem)
+        _navigateToSavedScreen.update { true }
     }
 
 }

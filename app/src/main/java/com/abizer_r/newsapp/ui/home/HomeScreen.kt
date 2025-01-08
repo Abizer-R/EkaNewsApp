@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,10 +23,18 @@ import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
 @Composable
 fun HomeScreen(
+    goToSavedScreen: () -> Unit = {},
     viewModel: NewsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val navigateToSavedScreen by viewModel.navigateToSavedScreenState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(navigateToSavedScreen) {
+        if (navigateToSavedScreen) {
+            goToSavedScreen()
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

@@ -71,7 +71,13 @@ fun NewsNavHostContainer(navController: NavHostController, paddingValue: Padding
         modifier = Modifier.padding(paddingValue).fillMaxSize()
     ) {
         composable(BottomNavTabs.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                goToSavedScreen = {
+                    navController.navigate(BottomNavTabs.Saved.route) {
+                        popUpTo(BottomNavTabs.Home.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(BottomNavTabs.Saved.route) {
