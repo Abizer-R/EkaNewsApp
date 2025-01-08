@@ -5,11 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = News_TABLE_NAME)
 data class NewsItemDb(
-    @PrimaryKey val id: String,
+    val id: String,
     val heading: String,
     val description: String,
     val thumbnailUrl: String,
-    val newsUrl: String,
+    @PrimaryKey val newsUrl: String,
     val source: String = NEWS_SOURCE_API
 )
 

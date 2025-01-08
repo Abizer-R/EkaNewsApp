@@ -24,7 +24,7 @@ android {
         file("../local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
     }
     val newsApiKey: String = localProperties.getProperty("NEWS_API_KEY")
-        ?: "c0515b0da7f54bcd993091bbd5232e56"   // putting API key so that this project can run directly
+        ?: "2b75ee0ef538458e99045d05c3efa2a7"   // putting API key so that this project can run directly
 
     buildTypes {
         release {
