@@ -1,6 +1,8 @@
 package com.abizer_r.newsapp.ui.newsWebView
 
+import android.graphics.Bitmap
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,16 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -51,12 +55,8 @@ fun WebViewScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            AndroidView(
-                factory = { context ->
-                    WebView(context).apply {
-                        loadUrl(url)
-                    }
-                },
+            WebViewCompose(
+                url = url,
                 modifier = Modifier.weight(1f).fillMaxSize()
             )
         }
@@ -69,6 +69,38 @@ fun WebViewScreen(
                 .padding(16.dp)
         ) {
             Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Save")
+        }
+    }
+}
+
+@Composable
+private fun WebViewCompose(
+    url: String,
+    modifier: Modifier = Modifier
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    Box(modifier) {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                            super.onPageStarted(view, url, favicon)
+                            isLoading = true
+                        }
+
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            isLoading = false
+                        }
+                    }
+                    loadUrl(url)
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+        if (isLoading) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center))
         }
     }
 }
