@@ -1,4 +1,4 @@
-package com.abizer_r.newsapp.ui.home
+package com.abizer_r.newsapp.ui.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,42 +18,43 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class HomeScreenState {
-    data object Loading : HomeScreenState()
-    data class Success(val articles: List<NewsItem>) : HomeScreenState()
-    data class Failure(val errorMessage: String? = null) : HomeScreenState()
+sealed class SavedNewsScreenState {
+    data object Loading : SavedNewsScreenState()
+    data class Success(val articles: List<NewsItem>) : SavedNewsScreenState()
+    data class Failure(val errorMessage: String? = null) : SavedNewsScreenState()
 
     fun getNewsList(): List<NewsItem> =
         if (this is Success) articles else emptyList()
 }
 @HiltViewModel
-class NewsViewModel @Inject constructor(
+class SavedNewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
-    private val saveNewsUseCase: SavedNewsUseCase,
+    private val savedNewsUseCase: SavedNewsUseCase
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
-    val screenState: StateFlow<HomeScreenState> = _screenState
-
-    private val _navigateToSavedScreen = MutableStateFlow<Boolean>(false)
-    val navigateToSavedScreenState: StateFlow<Boolean> = _navigateToSavedScreen
+    private val _screenState = MutableStateFlow<SavedNewsScreenState>(SavedNewsScreenState.Loading)
+    val screenState: StateFlow<SavedNewsScreenState> = _screenState
 
     init {
-        fetchTopHeadlines()
+        fetchSavedNews()
     }
 
-    fun fetchTopHeadlines() = viewModelScope.launch {
-        getNewsUseCase.fetchTopHeadlines().onEach { result ->
+    fun fetchSavedNews() = viewModelScope.launch {
+        getNewsUseCase.fetchSavedNews().onEach { result ->
             val newState = when (result) {
-                is ResultData.Loading -> HomeScreenState.Loading
-                is ResultData.Failed -> HomeScreenState.Failure(result.message)
+                is ResultData.Loading -> SavedNewsScreenState.Loading
+                is ResultData.Failed -> SavedNewsScreenState.Failure(result.message)
                 is ResultData.Success -> {
                     val newsItems = result.data.map { it.toUiModel() }
-                    HomeScreenState.Success(newsItems)
+                    SavedNewsScreenState.Success(newsItems)
                 }
             }
             _screenState.update { newState }
         }.collect()
+    }
+
+    fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
+        savedNewsUseCase.deleteNewsByUrl(item.newsUrl)
     }
 
     fun saveNews(
@@ -64,8 +65,6 @@ class NewsViewModel @Inject constructor(
         if (newsItem == null)
             return@launch
         val dbItem = newsItem.toDbEntity().copy(source = source)
-        saveNewsUseCase.saveToDb(dbItem)
-        _navigateToSavedScreen.update { true }
+        savedNewsUseCase.saveToDb(dbItem)
     }
-
 }

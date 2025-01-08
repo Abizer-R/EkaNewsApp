@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.google.hilt.android) apply false
+    id("androidx.room") version "2.6.1" apply false
 }

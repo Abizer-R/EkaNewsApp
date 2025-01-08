@@ -8,4 +8,11 @@
     <string name="save">Save</string>
     <string name="failed_to_load_page">Failed to load page</string>
     <string name="retry">Retry</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+    <string name="okay">Okay</string>
+    <string name="save_dialog_text">Are you sure you want to save this news?</string>
+    <string name="unsave">Unsave</string>
+    <string name="unsave_dialog_text">Are you sure you want to unsave this news?</string>
+    <string name="unsave_successful">News Unsaved successfully</string>
 </resources>
