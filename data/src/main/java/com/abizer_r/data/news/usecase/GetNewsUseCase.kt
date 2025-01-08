@@ -3,7 +3,6 @@ package com.abizer_r.data.news.usecase
 import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.model.NewsItemApi
-import com.abizer_r.data.news.model.NewsResponse
 import com.abizer_r.data.news.repository.NewsRepository
 import com.abizer_r.data.util.ResultData
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +20,8 @@ class GetNewsUseCase @Inject constructor(
     fun fetchTopHeadlines(): Flow<ResultData<List<NewsItemApi>>> = flow {
         emit(ResultData.Loading())
         // TODO: add safe API call helper
-        val articles = repository.getTopHeadlines()
-        val newsItems = articles?.newsItems ?: emptyList()
+        val response = repository.getTopHeadlines()
+        val newsItems = response?.articles ?: emptyList()
         emit(ResultData.Success(newsItems))
     }.catch { e ->
         emit(ResultData.Failed(message = e.localizedMessage))

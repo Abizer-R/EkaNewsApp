@@ -3,7 +3,7 @@ package com.abizer_r.data.news.model
 import java.util.UUID
 
 data class NewsResponse(
-    val newsItems: List<NewsItemApi>? = null,
+    val articles: List<NewsItemApi>? = null,
     val status: String? = null,
     val totalResults: Int? = null
 )
