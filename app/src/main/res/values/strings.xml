@@ -16,4 +16,5 @@
     <string name="unsave_dialog_text">Are you sure you want to unsave this news?</string>
     <string name="unsave_successful">News Unsaved successfully</string>
     <string name="no_connection">No Connection</string>
+    <string name="showing_cached_data_error">Showing cached data due to network issues</string>
 </resources>

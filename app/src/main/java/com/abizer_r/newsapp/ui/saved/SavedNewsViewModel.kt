@@ -40,7 +40,7 @@ class SavedNewsViewModel @Inject constructor(
     }
 
     fun fetchSavedNews() = viewModelScope.launch {
-        getNewsUseCase.fetchSavedNews().onEach { result ->
+        getNewsUseCase.fetchUserSavedNews().onEach { result ->
             val newState = when (result) {
                 is ResultData.Loading -> SavedNewsScreenState.Loading
                 is ResultData.Failed -> SavedNewsScreenState.Failure(result.message)

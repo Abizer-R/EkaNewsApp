@@ -5,18 +5,28 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.newsapp.R
@@ -37,7 +47,12 @@ fun HomeScreen(
     val context = LocalContext.current
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val navigateToSavedScreen by viewModel.navigateToSavedScreenState.collectAsStateWithLifecycle()
-    val isNetworkAvailable by viewModel.isNetworkAvailable.collectAsStateWithLifecycle()
+
+    val isFromCache by remember {
+        derivedStateOf {
+            screenState is HomeScreenState.Success && (screenState as HomeScreenState.Success).isOldCachedData
+        }
+    }
 
     LaunchedEffect(navigateToSavedScreen) {
         if (navigateToSavedScreen) {
@@ -81,15 +96,48 @@ fun HomeScreen(
                 )
 
                 AnimatedVisibility(
-                    visible = !isNetworkAvailable
+                    visible = isFromCache
                 ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.no_connection),
-                        textAlign = TextAlign.Center
+                    val remoteError = (screenState as HomeScreenState.Success).errorMessage
+                        ?: stringResource(R.string.showing_cached_data_error)
+                    val errorText = if (viewModel.isNetworkAvailable.not()) {
+                        stringResource(R.string.showing_cached_data_error)
+                    } else remoteError
+                    OutdatedDataBanner(
+                        errorMessage = errorText,
+                        onRetryClicked = {
+                            viewModel.fetchTopHeadlines()
+                        }
                     )
                 }
             }
+        }
+    }
+    if (isFromCache) {
+        LaunchedEffect(Unit) {
+            val error = (screenState as HomeScreenState.Success).errorMessage
+            SnackbarHostState().showSnackbar(
+                message = error ?: context.getString(R.string.showing_cached_data_error)
+            )
+        }
+    }
+}
+
+@Composable
+fun OutdatedDataBanner(errorMessage: String?, onRetryClicked: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = errorMessage ?: stringResource(R.string.showing_cached_data_error),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Button(onClick = onRetryClicked) {
+            Text(stringResource(R.string.retry))
         }
     }
 }

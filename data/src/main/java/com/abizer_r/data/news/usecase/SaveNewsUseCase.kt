@@ -8,7 +8,7 @@ class SavedNewsUseCase @Inject constructor(
     private val repository: NewsRepository
 ) {
     suspend fun saveToDb(newsItem: NewsItemDb) {
-        repository.saveNewsToDb(newsItem)
+        repository.insertNewsToDb(newsItem)
     }
 
     suspend fun deleteNewsByUrl(url: String) {

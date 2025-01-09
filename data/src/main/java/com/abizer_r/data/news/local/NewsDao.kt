@@ -20,4 +20,7 @@ interface NewsDao {
 
     @Query("DELETE FROM news_items WHERE newsUrl = :url")
     suspend fun deleteNewsByUrl(url: String)
+
+    @Query("DELETE FROM $News_TABLE_NAME WHERE source = :source")
+    suspend fun deleteAllNewsBySource(source: String)
 }

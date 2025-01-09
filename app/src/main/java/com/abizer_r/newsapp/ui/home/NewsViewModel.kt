@@ -22,7 +22,11 @@ import javax.inject.Inject
 
 sealed class HomeScreenState {
     data object Loading : HomeScreenState()
-    data class Success(val articles: List<NewsItem>) : HomeScreenState()
+    data class Success(
+        val articles: List<NewsItem>,
+        val isOldCachedData: Boolean = false,
+        val errorMessage: String? = null
+    ) : HomeScreenState()
     data class Failure(val errorMessage: String? = null) : HomeScreenState()
 
     fun getNewsList(): List<NewsItem> =
@@ -41,7 +45,7 @@ class NewsViewModel @Inject constructor(
     private val _navigateToSavedScreen = MutableStateFlow<Boolean>(false)
     val navigateToSavedScreenState: StateFlow<Boolean> = _navigateToSavedScreen
 
-    val isNetworkAvailable: StateFlow<Boolean> get() = networkConnectionObserver.isNetworkAvailable
+    val isNetworkAvailable: Boolean get() = networkConnectionObserver.isConnected()
 
     init {
         fetchTopHeadlines()
@@ -53,8 +57,11 @@ class NewsViewModel @Inject constructor(
                 is ResultData.Loading -> HomeScreenState.Loading
                 is ResultData.Failed -> HomeScreenState.Failure(result.message)
                 is ResultData.Success -> {
-                    val newsItems = result.data.map { it.toUiModel() }
-                    HomeScreenState.Success(newsItems)
+                    HomeScreenState.Success(
+                        articles = result.data.newsList.map { it.toUiModel() },
+                        isOldCachedData = result.data.isOldCachedData,
+                        errorMessage = result.data.errorMsg
+                    )
                 }
             }
             _screenState.update { newState }
