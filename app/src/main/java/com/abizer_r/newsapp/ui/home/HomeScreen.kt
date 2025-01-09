@@ -97,16 +97,14 @@ fun HomeScreen(
                 onRefresh = { viewModel.fetchTopHeadlines() },
                 modifier = Modifier.fillMaxSize()
             ) {
-                HomeScreenContent(screenState, launcher, context, viewModel, isFromCache)
+                HomeScreenContent(
+                    screenState,
+                    launcher,
+                    context,
+                    isFromCache,
+                    onRetryClicked = { viewModel.fetchTopHeadlines() }
+                )
             }
-        }
-    }
-    if (isFromCache) {
-        LaunchedEffect(Unit) {
-            val error = (screenState as HomeScreenState.Success).errorMessage
-            SnackbarHostState().showSnackbar(
-                message = error ?: context.getString(R.string.showing_cached_data_error)
-            )
         }
     }
 }
@@ -116,8 +114,8 @@ private fun HomeScreenContent(
     screenState: HomeScreenState,
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     context: Context,
-    viewModel: NewsViewModel,
-    isFromCache: Boolean
+    isFromCache: Boolean,
+    onRetryClicked: () -> Unit
 ) {
     Column {
         NewsListVertical(
@@ -130,7 +128,12 @@ private fun HomeScreenContent(
                     }
                 )
             },
-            onReload = { viewModel.fetchTopHeadlines() },
+            emptyListView = {
+                RetryView(
+                    errorText = stringResource(R.string.no_news_found),
+                    onRetryClicked = onRetryClicked
+                )
+            },
             modifier = Modifier.weight(1f)
         )
 
@@ -139,9 +142,6 @@ private fun HomeScreenContent(
         ) {
             val remoteError = (screenState as HomeScreenState.Success).errorMessage
                 ?: stringResource(R.string.showing_cached_data_error)
-            val errorText = if (viewModel.isNetworkAvailable.not()) {
-                stringResource(R.string.showing_cached_data_error)
-            } else remoteError
             Row(
                 modifier = Modifier.padding(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -149,7 +149,7 @@ private fun HomeScreenContent(
             ) {
                 Icon(Icons.Default.Info, contentDescription = "")
                 Text(
-                    text = errorText,
+                    text = remoteError,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
                 )

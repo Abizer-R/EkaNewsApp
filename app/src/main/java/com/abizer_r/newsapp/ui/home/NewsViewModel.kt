@@ -1,7 +1,6 @@
 package com.abizer_r.newsapp.ui.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.usecase.GetNewsUseCase
@@ -10,7 +9,7 @@ import com.abizer_r.data.util.ResultData
 import com.abizer_r.newsapp.ui.home.model.NewsItem
 import com.abizer_r.newsapp.ui.home.model.toDbEntity
 import com.abizer_r.newsapp.ui.home.model.toUiModel
-import com.abizer_r.newsapp.util.NetworkConnectionObserver
+import com.abizer_r.data.util.NetworkConnectionObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

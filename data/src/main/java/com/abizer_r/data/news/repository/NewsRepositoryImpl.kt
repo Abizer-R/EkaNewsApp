@@ -8,6 +8,7 @@ import com.abizer_r.data.news.mappers.toDbEntity
 import com.abizer_r.data.news.model.NewsData
 import com.abizer_r.data.news.model.NewsItemApi
 import com.abizer_r.data.news.remote.NewsApiService
+import com.abizer_r.data.util.NetworkConnectionObserver
 import com.abizer_r.data.util.ResultData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class NewsRepositoryImpl @Inject constructor(
     private val newsApiService: NewsApiService,
     private val newsDao: NewsDao,
+    private val networkConnectionObserver: NetworkConnectionObserver
 ) : NewsRepository {
 
     override suspend fun getTopHeadlines(): Flow<ResultData<NewsData>> = flow {
@@ -42,15 +44,20 @@ class NewsRepositoryImpl @Inject constructor(
             return@flow
         }
 
+        val isNetworkConnected = networkConnectionObserver.isNetworkAvailable.first()
+        val remoteError = if (isNetworkConnected) {
+            (remoteNewsResult as? ResultData.Failed)?.message
+        } else "No internet connection"
+
         // Fallback to local data if remote fetch failed
         val localNewsList = getLocalNews()
         if (!localNewsList.isNullOrEmpty()) {
-            val remoteError = (remoteNewsResult as? ResultData.Failed)?.message
+
             val newsData =
                 NewsData(localNewsList, isOldCachedData = true, errorMsg = remoteError)
             emit(ResultData.Success(newsData))
         } else {
-            emit(ResultData.Failed("No data available"))
+            emit(ResultData.Failed(remoteError))
         }
     }
 
