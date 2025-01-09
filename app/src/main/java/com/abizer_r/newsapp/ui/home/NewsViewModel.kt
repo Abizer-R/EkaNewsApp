@@ -74,8 +74,8 @@ class NewsViewModel @Inject constructor(
         val newsItem = screenState.value.getNewsList().find { it.id == newsId }
         if (newsItem == null)
             return@launch
-        val dbItem = newsItem.toDbEntity().copy(source = source)
-        saveNewsUseCase.saveToDb(dbItem)
+        val dbItem = newsItem.toDbEntity().copy()
+        saveNewsUseCase.markNewsAsSaved(dbItem)
         _navigateToSavedScreen.update { true }
     }
 

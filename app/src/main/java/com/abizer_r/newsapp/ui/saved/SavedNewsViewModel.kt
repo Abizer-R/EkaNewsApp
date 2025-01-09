@@ -64,7 +64,7 @@ class SavedNewsViewModel @Inject constructor(
         val newsItem = screenState.value.getNewsList().find { it.id == newsId }
         if (newsItem == null)
             return@launch
-        val dbItem = newsItem.toDbEntity().copy(source = source)
-        savedNewsUseCase.saveToDb(dbItem)
+        val dbItem = newsItem.toDbEntity().copy()
+        savedNewsUseCase.markNewsAsSaved(dbItem)
     }
 }

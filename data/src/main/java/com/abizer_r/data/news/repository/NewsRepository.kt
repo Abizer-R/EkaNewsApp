@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface NewsRepository {
     suspend fun getTopHeadlines(): Flow<ResultData<NewsData>>
 
+    suspend fun markNewsAsSaved(newsItem: NewsItemDb)
+
     suspend fun insertNewsToDb(newsItem: NewsItemDb)
 
     suspend fun insertNewsItemsToDb(newsItems: List<NewsItemDb>)

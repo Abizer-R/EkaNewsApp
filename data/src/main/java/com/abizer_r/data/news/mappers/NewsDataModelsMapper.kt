@@ -5,14 +5,18 @@ import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.model.NewsItemApi
 import java.util.UUID
 
-fun NewsItemApi.toDbEntity(source: String): NewsItemDb {
+fun NewsItemApi.toDbEntity(
+    isSaved: Boolean = false,
+    isCached: Boolean = false,
+): NewsItemDb {
     return NewsItemDb(
         id = id,
         heading = this.title ?: "",
         description = this.description ?: "",
         thumbnailUrl = this.urlToImage ?: "",
         newsUrl = this.url ?: "",
-        source = source
+        isSaved = isSaved,
+        isCached = isCached
     )
 }
 

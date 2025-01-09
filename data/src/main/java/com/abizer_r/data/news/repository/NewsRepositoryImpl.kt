@@ -1,12 +1,9 @@
 package com.abizer_r.data.news.repository
 
-import com.abizer_r.data.news.local.NEWS_SOURCE_API
-import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.local.NewsDao
 import com.abizer_r.data.news.local.NewsItemDb
 import com.abizer_r.data.news.mappers.toDbEntity
 import com.abizer_r.data.news.model.NewsData
-import com.abizer_r.data.news.model.NewsItemApi
 import com.abizer_r.data.news.remote.NewsApiService
 import com.abizer_r.data.util.NetworkConnectionObserver
 import com.abizer_r.data.util.ResultData
@@ -27,9 +24,18 @@ class NewsRepositoryImpl @Inject constructor(
         val remoteNewsResult = try {
             val remoteNewsList = newsApiService.getTopHeadlines()?.articles
             if (!remoteNewsList.isNullOrEmpty()) {
-                newsDao.deleteAllNewsBySource(NEWS_SOURCE_API)
-                val newDbList = remoteNewsList.map { it.toDbEntity(NEWS_SOURCE_API) }
-                newsDao.insertNewsItems(newDbList)
+                newsDao.deleteAllCachedOnlyNews()
+
+                val newDbList = remoteNewsList.map { remoteItem ->
+                    // Check if the item is already marked as "saved"
+                    val isSaved = checkNewsSavedByUrl(remoteItem.url ?: "")
+                    remoteItem.toDbEntity(
+                        isCached = true,
+                        isSaved = isSaved
+                    )
+                }
+
+                insertNewsItemsToDb(newDbList)
 
                 ResultData.Success(NewsData(newDbList, isOldCachedData = false))
             } else {
@@ -50,7 +56,7 @@ class NewsRepositoryImpl @Inject constructor(
         } else "No internet connection"
 
         // Fallback to local data if remote fetch failed
-        val localNewsList = getLocalNews()
+        val localNewsList = getLocalCachedNews()
         if (!localNewsList.isNullOrEmpty()) {
 
             val newsData =
@@ -61,16 +67,33 @@ class NewsRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun getLocalNews(): List<NewsItemDb>? {
+    private suspend fun getLocalCachedNews(): List<NewsItemDb>? {
         return try {
-            newsDao.getAllNewsItems(source = NEWS_SOURCE_API).first()
+            newsDao.getAllCachedNews().first()
         } catch (e: Exception) {
             null
         }
     }
 
     override suspend fun checkNewsSavedByUrl(newsUrl: String): Boolean {
-        return newsDao.getNewsByUrl(newsUrl) != null
+        val news = newsDao.getNewsByUrl(newsUrl)
+        return news?.isSaved == true
+    }
+
+    private suspend fun checkNewsCachedByUrl(newsUrl: String): Boolean {
+        val news = newsDao.getNewsByUrl(newsUrl)
+        return news?.isCached == true
+    }
+
+    override suspend fun markNewsAsSaved(newsItem: NewsItemDb) {
+        // Check if the item is already marked as "cached"
+        val isCached = checkNewsCachedByUrl(newsItem.newsUrl)
+        insertNewsToDb(
+            newsItem.copy(
+                isCached = isCached,
+                isSaved = true
+            )
+        )
     }
 
     override suspend fun insertNewsToDb(newsItem: NewsItemDb) {
@@ -82,7 +105,8 @@ class NewsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserSavedNews(): Flow<List<NewsItemDb>> {
-        return newsDao.getAllNewsItems(source = NEWS_SOURCE_USER_SAVED)
+        val savedNews = newsDao.getAllSavedNews()
+        return savedNews
     }
 
     override suspend fun deleteNewsByUrl(url: String) {

@@ -10,7 +10,8 @@ data class NewsItemDb(
     val description: String,
     val thumbnailUrl: String,
     @PrimaryKey val newsUrl: String,
-    val source: String = NEWS_SOURCE_API
+    val isCached: Boolean = false,
+    val isSaved: Boolean = false
 )
 
 const val News_TABLE_NAME = "news_items"
