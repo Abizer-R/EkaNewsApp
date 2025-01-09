@@ -1,24 +1,34 @@
 package com.abizer_r.newsapp.ui.home
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +49,7 @@ import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_SHOUL
 import com.abizer_r.newsapp.ui.newsWebView.WebViewActivity.Companion.EXTRA_URL
 import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     goToSavedScreen: () -> Unit = {},
@@ -47,6 +58,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val navigateToSavedScreen by viewModel.navigateToSavedScreenState.collectAsStateWithLifecycle()
+    val isRefreshingByPull by remember { mutableStateOf(false) }
 
     val isFromCache by remember {
         derivedStateOf {
@@ -69,47 +81,23 @@ fun HomeScreen(
         }
     }
 
-    when (screenState) {
-        is HomeScreenState.Loading -> LoadingView()
+    when {
+        screenState is HomeScreenState.Loading && isRefreshingByPull.not() -> LoadingView()
 
-        is HomeScreenState.Failure -> RetryView(
+        screenState is HomeScreenState.Failure  -> RetryView(
             errorText = (screenState as HomeScreenState.Failure).errorMessage,
             onRetryClicked = {
                 viewModel.fetchTopHeadlines()
             }
         )
 
-        is HomeScreenState.Success -> {
-            Column {
-                NewsListVertical(
-                    newsList = screenState.getNewsList(),
-                    onItemClick = { item ->
-                        launcher.launch(
-                            Intent(context, WebViewActivity::class.java).apply {
-                                putExtra(EXTRA_URL, item.newsUrl)
-                                putExtra(EXTRA_NEWS_ID, item.id)
-                            }
-                        )
-                    },
-                    onReload = { viewModel.fetchTopHeadlines() },
-                    modifier = Modifier.weight(1f)
-                )
-
-                AnimatedVisibility(
-                    visible = isFromCache
-                ) {
-                    val remoteError = (screenState as HomeScreenState.Success).errorMessage
-                        ?: stringResource(R.string.showing_cached_data_error)
-                    val errorText = if (viewModel.isNetworkAvailable.not()) {
-                        stringResource(R.string.showing_cached_data_error)
-                    } else remoteError
-                    OutdatedDataBanner(
-                        errorMessage = errorText,
-                        onRetryClicked = {
-                            viewModel.fetchTopHeadlines()
-                        }
-                    )
-                }
+        else -> {
+            PullToRefreshBox(
+                isRefreshing = isRefreshingByPull,
+                onRefresh = { viewModel.fetchTopHeadlines() },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                HomeScreenContent(screenState, launcher, context, viewModel, isFromCache)
             }
         }
     }
@@ -124,20 +112,48 @@ fun HomeScreen(
 }
 
 @Composable
-fun OutdatedDataBanner(errorMessage: String?, onRetryClicked: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = errorMessage ?: stringResource(R.string.showing_cached_data_error),
-            style = MaterialTheme.typography.bodyMedium,
+private fun HomeScreenContent(
+    screenState: HomeScreenState,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    context: Context,
+    viewModel: NewsViewModel,
+    isFromCache: Boolean
+) {
+    Column {
+        NewsListVertical(
+            newsList = screenState.getNewsList(),
+            onItemClick = { item ->
+                launcher.launch(
+                    Intent(context, WebViewActivity::class.java).apply {
+                        putExtra(EXTRA_URL, item.newsUrl)
+                        putExtra(EXTRA_NEWS_ID, item.id)
+                    }
+                )
+            },
+            onReload = { viewModel.fetchTopHeadlines() },
             modifier = Modifier.weight(1f)
         )
-        Button(onClick = onRetryClicked) {
-            Text(stringResource(R.string.retry))
+
+        AnimatedVisibility(
+            visible = isFromCache
+        ) {
+            val remoteError = (screenState as HomeScreenState.Success).errorMessage
+                ?: stringResource(R.string.showing_cached_data_error)
+            val errorText = if (viewModel.isNetworkAvailable.not()) {
+                stringResource(R.string.showing_cached_data_error)
+            } else remoteError
+            Row(
+                modifier = Modifier.padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Info, contentDescription = "")
+                Text(
+                    text = errorText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
