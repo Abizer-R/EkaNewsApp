@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
@@ -124,7 +123,7 @@ fun WebViewScreen(
             isSaved = isSaved,
             onConfirm = {
                 if (isSaved) {
-                    viewModel.deleteNews(url)
+                    viewModel.unSaveNews(url)
                 } else {
                     onSaveClicked()
                 }

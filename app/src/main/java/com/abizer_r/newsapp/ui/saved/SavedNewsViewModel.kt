@@ -54,7 +54,7 @@ class SavedNewsViewModel @Inject constructor(
     }
 
     fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
-        savedNewsUseCase.deleteNewsByUrl(item.newsUrl)
+        savedNewsUseCase.unSaveNews(item.newsUrl)
     }
 
     fun saveNews(

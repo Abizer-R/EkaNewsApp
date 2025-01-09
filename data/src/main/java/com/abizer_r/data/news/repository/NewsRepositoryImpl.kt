@@ -10,6 +10,7 @@ import com.abizer_r.data.util.ResultData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import java.net.UnknownHostException
 import javax.inject.Inject
 
 class NewsRepositoryImpl @Inject constructor(
@@ -41,6 +42,8 @@ class NewsRepositoryImpl @Inject constructor(
             } else {
                 ResultData.Failed("No remote data available")
             }
+        } catch (e: UnknownHostException) {
+            ResultData.Failed("No internet connection")
         } catch (e: Exception) {
             ResultData.Failed(e.localizedMessage ?: "Failed to fetch remote news")
         }
@@ -50,7 +53,7 @@ class NewsRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val isNetworkConnected = networkConnectionObserver.isNetworkAvailable.first()
+        val isNetworkConnected = networkConnectionObserver.isConnected()
         val remoteError = if (isNetworkConnected) {
             (remoteNewsResult as? ResultData.Failed)?.message
         } else "No internet connection"
@@ -109,7 +112,14 @@ class NewsRepositoryImpl @Inject constructor(
         return savedNews
     }
 
-    override suspend fun deleteNewsByUrl(url: String) {
-        newsDao.deleteNewsByUrl(url)
+    override suspend fun unSaveNews(url: String) {
+        val newsItem = newsDao.getNewsByUrl(url) ?: return
+        if (newsItem.isCached) {
+            // Avoid removing item as it is still required in the "cached" list
+            val updatedItem = newsItem.copy(isSaved = false)
+            newsDao.insertNewsItems(listOf(updatedItem))
+        } else {
+            newsDao.deleteNewsByUrl(url)
+        }
     }
 }

@@ -16,7 +16,7 @@ interface NewsRepository {
 
     suspend fun getUserSavedNews(): Flow<List<NewsItemDb>>
 
-    suspend fun deleteNewsByUrl(url: String)
+    suspend fun unSaveNews(url: String)
 
     suspend fun checkNewsSavedByUrl(newsUrl: String): Boolean
 }
