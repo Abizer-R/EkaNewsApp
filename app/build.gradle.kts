@@ -70,21 +70,21 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation("androidx.compose.material:material-icons-extended-android:1.7.6")
+    implementation(libs.androidx.material.icons.extended.android)
 
 
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // hilt
     implementation(libs.google.hilt.android)
     kapt(libs.google.hilt.compiler)
     implementation(libs.androidx.hilt.compiler)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
 
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }
 
 kapt {

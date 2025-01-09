@@ -1,7 +1,7 @@
 package com.abizer_r.newsapp.di
 
 import android.content.Context
-import com.abizer_r.newsapp.util.NetworkConnectionObserver
+import com.abizer_r.data.util.NetworkConnectionObserver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -8,16 +8,21 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NewsDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNewsItems(newsItems: List<NewsItemDb>)
 
-    @Query("SELECT * FROM news_items WHERE newsUrl = :newsUrl LIMIT 1")
+    @Query("SELECT * FROM $News_TABLE_NAME WHERE newsUrl = :newsUrl LIMIT 1")
     suspend fun getNewsByUrl(newsUrl: String): NewsItemDb?
 
-    @Query("SELECT * from $News_TABLE_NAME WHERE source = :source")
-    fun getAllNewsItems(source: String): Flow<List<NewsItemDb>>
+    @Query("SELECT * from $News_TABLE_NAME WHERE isCached = 1")
+    fun getAllCachedNews(): Flow<List<NewsItemDb>>
 
-    @Query("DELETE FROM news_items WHERE newsUrl = :url")
+    @Query("SELECT * from $News_TABLE_NAME WHERE isSaved = 1")
+    fun getAllSavedNews(): Flow<List<NewsItemDb>>
+
+    @Query("DELETE FROM $News_TABLE_NAME WHERE newsUrl = :url")
     suspend fun deleteNewsByUrl(url: String)
+
+    @Query("DELETE FROM $News_TABLE_NAME WHERE isCached = 1 AND isSaved = 0")
+    suspend fun deleteAllCachedOnlyNews()
 }

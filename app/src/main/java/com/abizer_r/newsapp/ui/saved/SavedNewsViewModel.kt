@@ -40,7 +40,7 @@ class SavedNewsViewModel @Inject constructor(
     }
 
     fun fetchSavedNews() = viewModelScope.launch {
-        getNewsUseCase.fetchSavedNews().onEach { result ->
+        getNewsUseCase.fetchUserSavedNews().onEach { result ->
             val newState = when (result) {
                 is ResultData.Loading -> SavedNewsScreenState.Loading
                 is ResultData.Failed -> SavedNewsScreenState.Failure(result.message)
@@ -54,7 +54,7 @@ class SavedNewsViewModel @Inject constructor(
     }
 
     fun deleteSavedNews(item: NewsItem) = viewModelScope.launch {
-        savedNewsUseCase.deleteNewsByUrl(item.newsUrl)
+        savedNewsUseCase.unSaveNews(item.newsUrl)
     }
 
     fun saveNews(
@@ -64,7 +64,7 @@ class SavedNewsViewModel @Inject constructor(
         val newsItem = screenState.value.getNewsList().find { it.id == newsId }
         if (newsItem == null)
             return@launch
-        val dbItem = newsItem.toDbEntity().copy(source = source)
-        savedNewsUseCase.saveToDb(dbItem)
+        val dbItem = newsItem.toDbEntity().copy()
+        savedNewsUseCase.markNewsAsSaved(dbItem)
     }
 }

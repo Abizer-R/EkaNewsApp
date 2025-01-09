@@ -19,16 +19,13 @@ import com.abizer_r.newsapp.ui.theme.NewsAppTheme
 fun NewsListVertical(
     newsList: List<NewsItem>,
     showDelete: Boolean = false,
+    emptyListView: @Composable () -> Unit = {},
     onItemClick: (NewsItem) -> Unit = {},
-    onReload: () -> Unit = {},
     onDeleteClick: (NewsItem) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (newsList.isEmpty()) {
-        RetryView(
-            errorText = stringResource(R.string.no_news_found),
-            onRetryClicked = onReload
-        )
+        emptyListView()
         return
     }
 

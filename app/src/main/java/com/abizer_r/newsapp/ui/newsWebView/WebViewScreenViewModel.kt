@@ -26,8 +26,8 @@ class WebViewScreenViewModel @Inject constructor(
         _isSaved.value = result
     }
 
-    fun deleteNews(newsUrl: String) = viewModelScope.launch {
-        savedNewsUseCase.deleteNewsByUrl(newsUrl)
+    fun unSaveNews(newsUrl: String) = viewModelScope.launch {
+        savedNewsUseCase.unSaveNews(newsUrl)
         _newsUnsaved.update { true }
         _isSaved.update { false }
     }

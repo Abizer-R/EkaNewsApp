@@ -1,7 +1,6 @@
 package com.abizer_r.newsapp.ui.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.data.news.local.NEWS_SOURCE_USER_SAVED
 import com.abizer_r.data.news.usecase.GetNewsUseCase
@@ -10,7 +9,7 @@ import com.abizer_r.data.util.ResultData
 import com.abizer_r.newsapp.ui.home.model.NewsItem
 import com.abizer_r.newsapp.ui.home.model.toDbEntity
 import com.abizer_r.newsapp.ui.home.model.toUiModel
-import com.abizer_r.newsapp.util.NetworkConnectionObserver
+import com.abizer_r.data.util.NetworkConnectionObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +21,11 @@ import javax.inject.Inject
 
 sealed class HomeScreenState {
     data object Loading : HomeScreenState()
-    data class Success(val articles: List<NewsItem>) : HomeScreenState()
+    data class Success(
+        val articles: List<NewsItem>,
+        val isOldCachedData: Boolean = false,
+        val errorMessage: String? = null
+    ) : HomeScreenState()
     data class Failure(val errorMessage: String? = null) : HomeScreenState()
 
     fun getNewsList(): List<NewsItem> =
@@ -41,7 +44,7 @@ class NewsViewModel @Inject constructor(
     private val _navigateToSavedScreen = MutableStateFlow<Boolean>(false)
     val navigateToSavedScreenState: StateFlow<Boolean> = _navigateToSavedScreen
 
-    val isNetworkAvailable: StateFlow<Boolean> get() = networkConnectionObserver.isNetworkAvailable
+    val isNetworkAvailable: Boolean get() = networkConnectionObserver.isConnected()
 
     init {
         fetchTopHeadlines()
@@ -53,8 +56,11 @@ class NewsViewModel @Inject constructor(
                 is ResultData.Loading -> HomeScreenState.Loading
                 is ResultData.Failed -> HomeScreenState.Failure(result.message)
                 is ResultData.Success -> {
-                    val newsItems = result.data.map { it.toUiModel() }
-                    HomeScreenState.Success(newsItems)
+                    HomeScreenState.Success(
+                        articles = result.data.newsList.map { it.toUiModel() },
+                        isOldCachedData = result.data.isOldCachedData,
+                        errorMessage = result.data.errorMsg
+                    )
                 }
             }
             _screenState.update { newState }
@@ -68,8 +74,8 @@ class NewsViewModel @Inject constructor(
         val newsItem = screenState.value.getNewsList().find { it.id == newsId }
         if (newsItem == null)
             return@launch
-        val dbItem = newsItem.toDbEntity().copy(source = source)
-        saveNewsUseCase.saveToDb(dbItem)
+        val dbItem = newsItem.toDbEntity().copy()
+        saveNewsUseCase.markNewsAsSaved(dbItem)
         _navigateToSavedScreen.update { true }
     }
 

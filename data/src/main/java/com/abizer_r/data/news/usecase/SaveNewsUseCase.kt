@@ -7,12 +7,12 @@ import javax.inject.Inject
 class SavedNewsUseCase @Inject constructor(
     private val repository: NewsRepository
 ) {
-    suspend fun saveToDb(newsItem: NewsItemDb) {
-        repository.saveNewsToDb(newsItem)
+    suspend fun markNewsAsSaved(newsItem: NewsItemDb) {
+        repository.markNewsAsSaved(newsItem)
     }
 
-    suspend fun deleteNewsByUrl(url: String) {
-        repository.deleteNewsByUrl(url)
+    suspend fun unSaveNews(url: String) {
+        repository.unSaveNews(url)
     }
 
     suspend fun checkNewsSavedByUrl(newsUrl: String): Boolean {

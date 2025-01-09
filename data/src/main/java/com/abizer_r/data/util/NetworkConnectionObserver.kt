@@ -1,4 +1,4 @@
-package com.abizer_r.newsapp.util
+package com.abizer_r.data.util
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -8,8 +8,6 @@ import android.net.NetworkRequest
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
